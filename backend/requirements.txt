@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+playwright
+pillow
+requests
+sqlalchemy
+python-multipart
+python-jose
+passlib
+bcrypt
+jinja2
+aiofiles
