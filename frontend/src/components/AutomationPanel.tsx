@@ -1,44 +1,110 @@
-type Props = {
-  prompt: string;
-  setPrompt: any;
-  runAutomation: any;
-  generateTestCases: any;
-  loading: boolean;
-};
+import { useState } from "react";
+import API from "../services/api";
 
-function AutomationPanel({
-  prompt,
-  setPrompt,
-  runAutomation,
-  generateTestCases,
-  loading,
-}: Props) {
+function AutomationPanel() {
+
+  const [prompt, setPrompt] = useState("");
+
+  const [loading, setLoading] = useState(false);
+
+  const [logs, setLogs] = useState<string[]>([]);
+
+  const [testcases, setTestcases] = useState<string[]>([]);
+
+  // RUN AUTOMATION
+  const runAutomation = async () => {
+
+    if (!prompt.trim()) {
+      alert("Please enter prompt");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+
+      const response = await API.post(
+        `/generate-test?prompt=${encodeURIComponent(prompt)}&mode=Demo`
+      );
+
+      setLogs(response.data.logs || []);
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Automation failed");
+
+    }
+
+    setLoading(false);
+
+  };
+
+  // GENERATE TEST CASES
+  const generateTestCases = async () => {
+
+    if (!prompt.trim()) {
+      alert("Please enter testing scenario");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+
+      const response = await API.post(
+        `/generate-testcases?prompt=${encodeURIComponent(prompt)}`
+      );
+
+      setTestcases(
+        response.data.testcases || []
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Failed to generate test cases");
+
+    }
+
+    setLoading(false);
+
+  };
 
   return (
 
     <div
       style={{
-        background: "#111827",
+        background: "#0F172A",
         padding: "30px",
         borderRadius: "20px",
         marginTop: "30px",
       }}
     >
 
-      <h2>🤖 Run Automation</h2>
+      <h1
+        style={{
+          color: "white",
+          marginBottom: "20px",
+        }}
+      >
+        🤖 Run Automation
+      </h1>
 
       <input
+        type="text"
+        placeholder="Enter automation prompt..."
         value={prompt}
         onChange={(e) =>
           setPrompt(e.target.value)
         }
-        placeholder="Example: Open GitHub"
         style={{
           width: "100%",
           padding: "15px",
-          marginTop: "20px",
           borderRadius: "12px",
-          border: "1px solid #334155",
+          border: "none",
           background: "#1E293B",
           color: "white",
         }}
@@ -46,15 +112,24 @@ function AutomationPanel({
 
       <div
         style={{
-          marginTop: "20px",
           display: "flex",
-          gap: "15px",
+          gap: "20px",
+          marginTop: "20px",
         }}
       >
 
         <button
           onClick={runAutomation}
-          style={buttonStyle}
+          disabled={loading}
+          style={{
+            padding: "14px 24px",
+            borderRadius: "12px",
+            border: "none",
+            background: "#6366F1",
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
         >
           {loading
             ? "Running..."
@@ -63,10 +138,15 @@ function AutomationPanel({
 
         <button
           onClick={generateTestCases}
+          disabled={loading}
           style={{
-            ...buttonStyle,
-            background:
-              "linear-gradient(to right, #22C55E, #16A34A)",
+            padding: "14px 24px",
+            borderRadius: "12px",
+            border: "none",
+            background: "#22C55E",
+            color: "white",
+            fontWeight: "bold",
+            cursor: "pointer",
           }}
         >
           Generate Test Cases
@@ -74,20 +154,65 @@ function AutomationPanel({
 
       </div>
 
+      {/* TEST CASES */}
+
+      <div
+        style={{
+          marginTop: "30px",
+        }}
+      >
+
+        {testcases.map(
+          (testcase, index) => (
+
+            <div
+              key={index}
+              style={{
+                background: "#1E293B",
+                padding: "15px",
+                borderRadius: "12px",
+                color: "white",
+                marginBottom: "10px",
+              }}
+            >
+              ✅ {testcase}
+            </div>
+
+          )
+        )}
+
+      </div>
+
+      {/* LOGS */}
+
+      <div
+        style={{
+          marginTop: "30px",
+          background: "#020617",
+          padding: "20px",
+          borderRadius: "16px",
+          color: "#38BDF8",
+          minHeight: "200px",
+          fontFamily: "monospace",
+        }}
+      >
+
+        {logs.length === 0
+          ? "No execution logs available"
+          : logs.map(
+              (log, index) => (
+                <div key={index}>
+                  {log}
+                </div>
+              )
+            )}
+
+      </div>
+
     </div>
 
   );
-}
 
-const buttonStyle = {
-  padding: "14px 22px",
-  borderRadius: "12px",
-  border: "none",
-  cursor: "pointer",
-  background:
-    "linear-gradient(to right, #4F8CFF, #7B61FF)",
-  color: "white",
-  fontWeight: "bold",
-};
+}
 
 export default AutomationPanel;
