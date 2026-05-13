@@ -1,124 +1,67 @@
+import { Link } from "react-router-dom";
+
 function Sidebar() {
 
-  const menuItems = [
-
+  const menu = [
     "Dashboard",
-
     "Automations",
-
     "Analytics",
-
     "AI Insights",
-
     "Reports",
-
     "CI/CD",
-
     "Security",
-
     "Settings",
-
   ];
 
   return (
 
     <div
       style={{
-        width: "270px",
-        background: "#0F172A",
-        padding: "30px",
+        width: "260px",
+        background: "#020617",
+        padding: "20px",
         minHeight: "100vh",
-        borderRight: "1px solid #1E293B",
       }}
     >
 
-      {/* Logo */}
+      {menu.map((item, index) => (
 
-      <div
-        style={{
-          marginBottom: "40px",
-        }}
-      >
-
-        <h1
+        <Link
+          key={index}
+          to="/dashboard"
           style={{
-            color: "#4F8CFF",
-            fontSize: "34px",
-            marginBottom: "10px",
-          }}
-        >
-          TestPilot AI
-        </h1>
-
-        <p
-          style={{
-            color: "#94A3B8",
-            fontSize: "14px",
-          }}
-        >
-          Enterprise QA Platform
-        </p>
-
-      </div>
-
-      {/* Menu */}
-
-      {menuItems.map((item, index) => (
-
-        <div
-          key={item}
-          style={{
-            padding: "16px",
+            display: "block",
+            padding: "18px",
             marginBottom: "15px",
             borderRadius: "14px",
+            textDecoration: "none",
             background:
               index === 0
-                ? "linear-gradient(to right, #4F8CFF, #7B61FF)"
-                : "#111827",
-            cursor: "pointer",
+                ? "#6366F1"
+                : "transparent",
             color: "white",
             fontWeight: "bold",
-            transition: "0.3s",
           }}
         >
           {item}
-        </div>
+        </Link>
 
       ))}
 
-      {/* Bottom Status */}
-
       <div
         style={{
-          marginTop: "60px",
-          background: "#111827",
-          padding: "20px",
-          borderRadius: "16px",
+          marginTop: "100px",
+          color: "#22C55E",
+          fontWeight: "bold",
         }}
       >
-
-        <h3
-          style={{
-            marginBottom: "10px",
-          }}
-        >
-          AI Status
-        </h3>
-
-        <p
-          style={{
-            color: "#22C55E",
-            fontWeight: "bold",
-          }}
-        >
-          ● Online
-        </p>
-
+        ● Online
       </div>
 
     </div>
 
   );
+
 }
 
 export default Sidebar;
