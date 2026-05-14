@@ -1,8 +1,12 @@
 import {
-  LayoutDashboard,
+  useEffect,
+  useState,
+} from "react";
+
+import {
   Rocket,
-  Shield,
   Brain,
+  Shield,
   Activity,
   Bell,
   Search,
@@ -11,113 +15,276 @@ import {
   Bot,
   Settings,
   PlayCircle,
+  Globe,
+  Moon,
 } from "lucide-react";
 
 import "./Dashboard.css";
 
+import {
+  runAutomation,
+  getHistory,
+  generateTestCases,
+} from "../services/api";
+
+import {
+  Link,
+} from "react-router-dom";
+
 function Dashboard() {
 
-  const stats = [
-    {
-      title: "Total Executions",
-      value: "24,892",
-      icon: <Rocket size={30} />,
-    },
-    {
-      title: "AI Accuracy",
-      value: "98.7%",
-      icon: <Brain size={30} />,
-    },
-    {
-      title: "Security Score",
-      value: "A+",
-      icon: <Shield size={30} />,
-    },
-    {
-      title: "System Health",
-      value: "ONLINE",
-      icon: <Activity size={30} />,
-    },
-  ];
+  const [website, setWebsite] =
+    useState("");
+
+  const [result, setResult] =
+    useState<any>(null);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [history, setHistory] =
+    useState<any[]>([]);
+
+  const [testCases, setTestCases] =
+    useState<any[]>([]);
+
+  const currentTime =
+    new Date().toLocaleTimeString();
+
+  useEffect(() => {
+
+    loadHistory();
+
+  }, []);
+
+  const loadHistory =
+    async () => {
+
+      try {
+
+        const data =
+          await getHistory();
+
+        setHistory(data);
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    };
+
+  // RUN AUTOMATION
+
+  const runTest =
+    async () => {
+
+      if (!website) {
+
+        alert(
+          "Enter Website URL"
+        );
+
+        return;
+      }
+
+      try {
+
+        setLoading(true);
+
+        const data =
+          await runAutomation(
+            website
+          );
+
+        setResult(data);
+
+        setLoading(false);
+
+        loadHistory();
+
+      } catch (error) {
+
+        console.log(error);
+
+        setLoading(false);
+
+      }
+
+    };
+
+  // GENERATE AI TEST CASES
+
+  const generateCases =
+    async () => {
+
+      if (!website) {
+
+        alert(
+          "Enter Website URL"
+        );
+
+        return;
+      }
+
+      try {
+
+        const data =
+          await generateTestCases(
+            website
+          );
+
+        setTestCases(
+          data.testcases
+        );
+
+      } catch (error) {
+
+        console.log(error);
+
+      }
+
+    };
+
+  // REAL METRICS
+
+  const totalExecutions =
+    history.length;
+
+  const latestAccuracy =
+    history.length > 0
+      ? history[
+          history.length - 1
+        ].ai_accuracy
+      : 0;
+
+  const latestSecurity =
+    history.length > 0
+      ? history[
+          history.length - 1
+        ].security_score
+      : "N/A";
+
+  const systemHealth =
+    history.length > 0
+      ? "ONLINE"
+      : "IDLE";
 
   return (
 
-    <div className="dashboard-container">
+    <div className="dashboard">
 
       {/* SIDEBAR */}
 
-      <aside className="sidebar">
+      <div className="sidebar">
 
-        <div>
+        <div className="logo">
 
-          <div className="logo-box">
+          <div className="logo-icon">
+            🤖
+          </div>
 
-            <div className="logo-icon">
-              🤖
-            </div>
+          <div>
 
-            <div>
-              <h2>TestPilot AI</h2>
-              <p>Enterprise QA Platform</p>
-            </div>
+            <h2>
+              TestPilot AI
+            </h2>
+
+            <p>
+              Enterprise QA Platform
+            </p>
 
           </div>
 
-          <div className="menu active">
-            <LayoutDashboard size={20} />
-            Dashboard
-          </div>
+        </div>
 
-          <div className="menu">
-            <PlayCircle size={20} />
-            Automations
-          </div>
+        <div className="menu">
 
-          <div className="menu">
+          <Link
+            to="/"
+            className="menu-item active"
+          >
+
             <BarChart3 size={20} />
-            Analytics
-          </div>
 
-          <div className="menu">
+            Dashboard
+
+          </Link>
+
+          <Link
+            to="/reports"
+            className="menu-item"
+          >
+
             <FileText size={20} />
+
             Reports
-          </div>
 
-          <div className="menu">
+          </Link>
+
+          <Link
+            to="/executions"
+            className="menu-item"
+          >
+
+            <Activity size={20} />
+
+            Executions
+
+          </Link>
+
+          <Link
+            to="/analytics"
+            className="menu-item"
+          >
+
+            <BarChart3 size={20} />
+
+            Analytics
+
+          </Link>
+
+          <Link
+            to="/assistant"
+            className="menu-item"
+          >
+
             <Bot size={20} />
+
             AI Assistant
-          </div>
 
-          <div className="menu">
+          </Link>
+
+          <Link
+            to="/settings"
+            className="menu-item"
+          >
+
             <Settings size={20} />
+
             Settings
-          </div>
+
+          </Link>
+
+          <Link
+            to="/integrations"
+            className="menu-item"
+          >
+
+            <Globe size={20} />
+
+            Integrations
+
+          </Link>
 
         </div>
 
-        {/* AI CARD */}
+      </div>
 
-        <div className="ai-card">
+      {/* MAIN */}
 
-          <h3>AI Engine</h3>
-
-          <p className="online">
-            ● Online
-          </p>
-
-          <div className="ai-visual"></div>
-
-          <p>Model: GPT-4o</p>
-
-          <p>Accuracy: 98.7%</p>
-
-        </div>
-
-      </aside>
-
-      {/* MAIN CONTENT */}
-
-      <main className="main-content">
+      <div className="main-content">
 
         {/* TOPBAR */}
 
@@ -128,6 +295,7 @@ function Dashboard() {
             <Search size={18} />
 
             <input
+              type="text"
               placeholder="Search anything..."
             />
 
@@ -135,9 +303,46 @@ function Dashboard() {
 
           <div className="top-icons">
 
+            {/* LOGOUT */}
+
+            <button
+              onClick={() => {
+
+                localStorage.removeItem(
+                  "isAuth"
+                );
+
+                window.location.href =
+                  "/login";
+
+              }}
+
+              style={{
+
+                background:"#ef4444",
+
+                border:"none",
+
+                color:"white",
+
+                padding:"10px 14px",
+
+                borderRadius:"12px",
+
+                cursor:"pointer",
+
+              }}
+            >
+
+              Logout
+
+            </button>
+
             <Bell />
 
-            <div className="profile">
+            <Moon />
+
+            <div className="avatar">
               A
             </div>
 
@@ -151,34 +356,67 @@ function Dashboard() {
 
           <div>
 
-            <span className="badge">
+            <div className="tag">
+
               ✨ Enterprise AI QA Platform
-            </span>
+
+            </div>
 
             <h1>
+
               Autonomous AI
               <br />
 
               <span>
+
                 Testing Platform
+
               </span>
 
             </h1>
 
             <p>
-              Intelligent automation platform for generating,
-              executing, analyzing, and scaling enterprise-grade
-              QA workflows using AI.
+
+              Intelligent automation
+              platform for generating,
+              executing, analyzing,
+              and scaling enterprise QA
+              workflows using AI.
+
+            </p>
+
+            {/* LIVE TIME */}
+
+            <p
+              style={{
+
+                color:"#22c55e",
+
+                marginTop:"18px",
+
+                fontWeight:"bold",
+
+              }}
+            >
+
+              Live Time:
+              {" "}
+              {currentTime}
+
             </p>
 
             <div className="hero-buttons">
 
               <button className="primary-btn">
+
                 Launch Automation
+
               </button>
 
               <button className="secondary-btn">
+
                 View Analytics
+
               </button>
 
             </div>
@@ -191,33 +429,65 @@ function Dashboard() {
 
             <div className="status-header">
 
-              <h2>AI Core Status</h2>
+              <h2>
 
-              <span>LIVE</span>
+                AI Core Status
 
-            </div>
+              </h2>
 
-            <div className="status-item">
+              <span>
 
-              <div>Automation Engine</div>
+                LIVE
 
-              <strong>Active</strong>
-
-            </div>
-
-            <div className="status-item">
-
-              <div>AI Model</div>
-
-              <strong>GPT-4o</strong>
+              </span>
 
             </div>
 
             <div className="status-item">
 
-              <div>Execution Time</div>
+              <p>
 
-              <strong>1.2s Avg</strong>
+                Automation Engine
+
+              </p>
+
+              <strong>
+
+                Active
+
+              </strong>
+
+            </div>
+
+            <div className="status-item">
+
+              <p>
+
+                AI Model
+
+              </p>
+
+              <strong>
+
+                GPT-4o
+
+              </strong>
+
+            </div>
+
+            <div className="status-item">
+
+              <p>
+
+                Execution Time
+
+              </p>
+
+              <strong>
+
+                1.2s Avg
+
+              </strong>
 
             </div>
 
@@ -229,78 +499,556 @@ function Dashboard() {
 
         <div className="stats-grid">
 
-          {stats.map((card, index) => (
+          <div className="stat-card">
 
-            <div className="stat-card" key={index}>
+            <div>
 
-              <div className="stat-top">
+              <p>
 
-                <div>
+                Total Executions
 
-                  <p>{card.title}</p>
+              </p>
 
-                  <h2>{card.value}</h2>
+              <h2>
 
-                </div>
+                {totalExecutions}
 
-                <div className="stat-icon">
-
-                  {card.icon}
-
-                </div>
-
-              </div>
-
-              <span className="growth">
-                ↑ Real-time AI analytics
-              </span>
+              </h2>
 
             </div>
 
-          ))}
+            <div className="icon-box purple">
+
+              <Rocket />
+
+            </div>
+
+          </div>
+
+          <div className="stat-card">
+
+            <div>
+
+              <p>
+
+                AI Accuracy
+
+              </p>
+
+              <h2>
+
+                {latestAccuracy}%
+
+              </h2>
+
+            </div>
+
+            <div className="icon-box pink">
+
+              <Brain />
+
+            </div>
+
+          </div>
+
+          <div className="stat-card">
+
+            <div>
+
+              <p>
+
+                Security Score
+
+              </p>
+
+              <h2>
+
+                {latestSecurity}
+
+              </h2>
+
+            </div>
+
+            <div className="icon-box green">
+
+              <Shield />
+
+            </div>
+
+          </div>
+
+          <div className="stat-card">
+
+            <div>
+
+              <p>
+
+                System Health
+
+              </p>
+
+              <h2>
+
+                {systemHealth}
+
+              </h2>
+
+            </div>
+
+            <div className="icon-box blue">
+
+              <Activity />
+
+            </div>
+
+          </div>
 
         </div>
 
         {/* AUTOMATION */}
 
-        <div className="automation-panel">
+        <div className="automation-box">
 
           <h2>
+
             🚀 AI Automation Runner
+
           </h2>
 
-          <input
-            placeholder="Enter automation prompt..."
-            className="automation-input"
-          />
+          <div className="automation-input">
 
-          <div className="hero-buttons">
+            <input
+              type="text"
+              placeholder="https://example.com"
+              value={website}
+              onChange={(e) =>
+                setWebsite(
+                  e.target.value
+                )
+              }
+            />
 
-            <button className="primary-btn">
+            <button
+              onClick={runTest}
+            >
+
+              <PlayCircle size={20} />
+
+            </button>
+
+          </div>
+
+          <div className="automation-buttons">
+
+            <button
+              className="run-btn"
+              onClick={runTest}
+            >
+
               Run Automation
+
             </button>
 
-            <button className="green-btn">
+            <button
+              className="generate-btn"
+              onClick={generateCases}
+            >
+
               Generate Test Cases
+
             </button>
 
           </div>
 
-          <div className="logs-box">
+          {/* LOADING */}
 
-            <p>✓ AI generated login test scenarios</p>
+          {loading && (
 
-            <p>✓ Chrome automation executed</p>
+            <div className="results-box">
 
-            <p>✓ Security validation passed</p>
+              <p>
 
-            <p>✓ PDF report exported</p>
+                AI Engine Running...
 
-          </div>
+              </p>
+
+            </div>
+
+          )}
+
+          {/* RESULT */}
+
+          {result && (
+
+            <div className="results-box">
+
+              <h3
+                style={{
+                  marginBottom:"20px",
+                }}
+              >
+
+                Live AI Execution Results
+
+              </h3>
+
+              <div
+                style={{
+
+                  display:"grid",
+
+                  gridTemplateColumns:
+                    "repeat(auto-fit,minmax(240px,1fr))",
+
+                  gap:"20px",
+
+                }}
+              >
+
+                <div
+                  style={{
+
+                    background:"#111827",
+
+                    padding:"20px",
+
+                    borderRadius:"18px",
+
+                  }}
+                >
+
+                  <p>
+
+                    Website
+
+                  </p>
+
+                  <h3>
+
+                    {result.website}
+
+                  </h3>
+
+                </div>
+
+                <div
+                  style={{
+
+                    background:"#111827",
+
+                    padding:"20px",
+
+                    borderRadius:"18px",
+
+                  }}
+                >
+
+                  <p>
+
+                    AI Accuracy
+
+                  </p>
+
+                  <h3>
+
+                    {result.ai_accuracy}%
+
+                  </h3>
+
+                </div>
+
+                <div
+                  style={{
+
+                    background:"#111827",
+
+                    padding:"20px",
+
+                    borderRadius:"18px",
+
+                  }}
+                >
+
+                  <p>
+
+                    Security Score
+
+                  </p>
+
+                  <h3>
+
+                    {result.security_score}
+
+                  </h3>
+
+                </div>
+
+                <div
+                  style={{
+
+                    background:"#111827",
+
+                    padding:"20px",
+
+                    borderRadius:"18px",
+
+                  }}
+                >
+
+                  <p>
+
+                    Execution Time
+
+                  </p>
+
+                  <h3>
+
+                    {result.execution_time}s
+
+                  </h3>
+
+                </div>
+
+              </div>
+
+              {/* LIVE LOGS */}
+
+              <div
+                style={{
+
+                  marginTop:"30px",
+
+                  background:"#020617",
+
+                  padding:"24px",
+
+                  borderRadius:"20px",
+
+                }}
+              >
+
+                <h3
+                  style={{
+                    marginBottom:"18px",
+                  }}
+                >
+
+                  Live AI Activity
+
+                </h3>
+
+                <p>
+                  ✓ Initializing AI engine...
+                </p>
+
+                <p>
+                  ✓ Scanning website structure...
+                </p>
+
+                <p>
+                  ✓ Detecting buttons and forms...
+                </p>
+
+                <p>
+                  ✓ Running automation scenarios...
+                </p>
+
+                <p>
+                  ✓ Capturing screenshots...
+                </p>
+
+                <p>
+                  ✓ Generating analytics...
+                </p>
+
+                <p>
+                  ✓ Exporting HTML report...
+                </p>
+
+              </div>
+
+              {/* SCREENSHOT */}
+
+              {result.screenshot && (
+
+                <div
+                  style={{
+                    marginTop:"30px",
+                  }}
+                >
+
+                  <h3
+                    style={{
+                      marginBottom:"18px",
+                    }}
+                  >
+
+                    Captured Screenshot
+
+                  </h3>
+
+                  <img
+                    src={result.screenshot}
+                    alt="screenshot"
+                    style={{
+
+                      width:"100%",
+
+                      borderRadius:"22px",
+
+                    }}
+                  />
+
+                </div>
+
+              )}
+
+              {/* REPORT BUTTON */}
+
+              {result.report && (
+
+                <a
+                  href={result.report}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+
+                    display:"inline-block",
+
+                    marginTop:"28px",
+
+                    background:
+                      "linear-gradient(135deg,#4f46e5,#9333ea)",
+
+                    padding:"16px 24px",
+
+                    borderRadius:"16px",
+
+                    color:"white",
+
+                    textDecoration:"none",
+
+                    fontWeight:"bold",
+
+                  }}
+                >
+
+                  Open Full Report
+
+                </a>
+
+              )}
+
+            </div>
+
+          )}
+
+          {/* AI TEST CASES */}
+
+          {testCases.length > 0 && (
+
+            <div className="results-box">
+
+              <h2
+                style={{
+                  marginBottom:"24px",
+                }}
+              >
+
+                AI Generated Test Cases
+
+              </h2>
+
+              {testCases.map(
+                (test, index) => (
+
+                  <div
+
+                    key={index}
+
+                    style={{
+
+                      background:"#111827",
+
+                      padding:"24px",
+
+                      borderRadius:"20px",
+
+                      marginBottom:"20px",
+
+                    }}
+                  >
+
+                    <h3
+                      style={{
+                        marginBottom:"18px",
+                      }}
+                    >
+
+                      {test.title}
+
+                    </h3>
+
+                    <ul
+                      style={{
+                        marginLeft:"20px",
+                      }}
+                    >
+
+                      {test.steps.map(
+                        (
+                          step:any,
+                          i:number
+                        ) => (
+
+                          <li
+                            key={i}
+                            style={{
+
+                              marginBottom:"10px",
+
+                              color:"#cbd5e1",
+
+                            }}
+                          >
+
+                            {step}
+
+                          </li>
+
+                        )
+                      )}
+
+                    </ul>
+
+                    <p
+                      style={{
+
+                        marginTop:"18px",
+
+                        color:"#22c55e",
+
+                      }}
+                    >
+
+                      Expected:
+                      {" "}
+                      {test.expected}
+
+                    </p>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          )}
 
         </div>
 
-      </main>
+      </div>
 
     </div>
 

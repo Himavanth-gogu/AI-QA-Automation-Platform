@@ -1,103 +1,40 @@
-from playwright.sync_api import sync_playwright
-import time
-import os
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import String
+from sqlalchemy import Float
 
-def run_playwright_test(prompt):
+from database import Base
 
-    logs = []
+class TestExecution(Base):
 
-    screenshot_path = "screenshots/real_result.png"
+    __tablename__ = "executions"
 
-    os.makedirs(
-        "screenshots",
-        exist_ok=True
-    )
+    id = Column(Integer, primary_key=True, index=True)
 
-    try:
+    website = Column(String)
 
-        logs.append(
-            "[INFO] Starting Playwright..."
-        )
+    title = Column(String)
 
-        with sync_playwright() as p:
+    buttons_found = Column(Integer)
 
-            browser = p.chromium.launch(
-                headless=True
-            )
+    links_found = Column(Integer)
 
-            logs.append(
-                "[INFO] Chromium browser launched"
-            )
+    forms_found = Column(Integer)
 
-            page = browser.new_page()
+    inputs_found = Column(Integer)
 
-            website = "https://google.com"
+    images_found = Column(Integer)
 
-            prompt_lower = prompt.lower()
+    console_errors = Column(Integer)
 
-            if "github" in prompt_lower:
-                website = "https://github.com"
+    failed_requests = Column(Integer)
 
-            elif "youtube" in prompt_lower:
-                website = "https://youtube.com"
+    execution_time = Column(Float)
 
-            elif "amazon" in prompt_lower:
-                website = "https://amazon.in"
+    security_score = Column(String)
 
-            elif "linkedin" in prompt_lower:
-                website = "https://linkedin.com"
+    ai_accuracy = Column(Float)
 
-            logs.append(
-                f"[INFO] Opening {website}"
-            )
+    screenshot = Column(String)
 
-            start_time = time.time()
-
-            page.goto(
-                website,
-                timeout=60000
-            )
-
-            logs.append(
-                "[INFO] Website loaded"
-            )
-
-            page.screenshot(
-                path=screenshot_path
-            )
-
-            logs.append(
-                "[SUCCESS] Screenshot captured"
-            )
-
-            browser.close()
-
-            end_time = time.time()
-
-            execution_time = round(
-                end_time - start_time,
-                2
-            )
-
-            logs.append(
-                "[SUCCESS] Browser closed"
-            )
-
-            return {
-                "status": "success",
-                "logs": logs,
-                "execution_time": execution_time,
-                "screenshot": screenshot_path,
-            }
-
-    except Exception as e:
-
-        logs.append(
-            f"[ERROR] {str(e)}"
-        )
-
-        return {
-            "status": "error",
-            "logs": logs,
-            "error": str(e),
-        }
+    report = Column(String)
