@@ -361,7 +361,7 @@ function AnalyticsPage() {
             >
 
               {securityData.map(
-                (entry, index) => (
+                (_, index) => (
 
                   <Cell
 
